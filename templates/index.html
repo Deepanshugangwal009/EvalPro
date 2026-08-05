@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Home | Online Examination System{% endblock %}
+
+{% block content %}
+<div class="p-5 mb-4 bg-light rounded-3 text-center">
+    <h1 class="display-6">Online Examination System</h1>
+    <p class="lead">Attempt scheduled online exams and check your results instantly.</p>
+    <div class="mt-4">
+        <a class="btn btn-primary me-2" href="{{ url_for('auth.student_login') }}">Student Login</a>
+        <a class="btn btn-success me-2" href="{{ url_for('auth.register') }}">Register</a>
+        <a class="btn btn-outline-dark" href="{{ url_for('auth.admin_login') }}">Admin Login</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Timer Based Exams</h5>
+                <p class="card-text">Every exam runs with a countdown timer and submits automatically when the time is over.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Instant Results</h5>
+                <p class="card-text">Answers are evaluated automatically and marks are calculated right after submission.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Performance History</h5>
+                <p class="card-text">Every attempt is stored so students can track their progress subject by subject.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

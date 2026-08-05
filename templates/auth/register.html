@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Registration{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+    <div class="card-body">
+        <h4 class="card-title">Student Registration</h4>
+        <form method="post">
+            <div class="mb-3">
+                <label class="form-label" for="name">Full Name</label>
+                <input class="form-control" type="text" id="name" name="name" value="{{ request.form.name }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="email">Email</label>
+                <input class="form-control" type="email" id="email" name="email" value="{{ request.form.email }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="password">Password</label>
+                <input class="form-control" type="password" id="password" name="password" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="course">Course</label>
+                <input class="form-control" type="text" id="course" name="course" value="{{ request.form.course }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="semester">Semester</label>
+                <input class="form-control" type="number" id="semester" name="semester" min="1" max="8" value="{{ request.form.semester }}" required>
+            </div>
+            <button class="btn btn-success w-100" type="submit">Register</button>
+        </form>
+        <p class="text-center mt-3 mb-0">
+            Already registered? <a href="{{ url_for('auth.student_login') }}">Login here</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
