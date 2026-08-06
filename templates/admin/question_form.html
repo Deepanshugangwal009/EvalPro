@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ form_title }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">{{ form_title }}</h4>
+        <p class="text-muted">{{ exam.exam_name }} &middot; {{ exam.subject_name }}</p>
+        <form method="post">
+            <div class="mb-3">
+                <label class="form-label" for="question_text">Question</label>
+                <textarea class="form-control" id="question_text" name="question_text" rows="3" required>{{ question.question_text }}</textarea>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" for="option_a">Option A</label>
+                    <input class="form-control" type="text" id="option_a" name="option_a" value="{{ question.option_a }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" for="option_b">Option B</label>
+                    <input class="form-control" type="text" id="option_b" name="option_b" value="{{ question.option_b }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" for="option_c">Option C</label>
+                    <input class="form-control" type="text" id="option_c" name="option_c" value="{{ question.option_c }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" for="option_d">Option D</label>
+                    <input class="form-control" type="text" id="option_d" name="option_d" value="{{ question.option_d }}" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" for="correct_answer">Correct Answer</label>
+                    <select class="form-select" id="correct_answer" name="correct_answer" required>
+                        <option value="">Select</option>
+                        {% for option in ['A', 'B', 'C', 'D'] %}
+                            <option value="{{ option }}" {% if question.correct_answer == option %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" for="marks">Marks</label>
+                    <input class="form-control" type="number" id="marks" name="marks" min="1" value="{{ question.marks }}" required>
+                </div>
+            </div>
+            <button class="btn btn-primary" type="submit">Save</button>
+            <a class="btn btn-outline-secondary" href="{{ url_for('admin.exam_questions', exam_id=exam.exam_id) }}">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

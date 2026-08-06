@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Subjects{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0">Subjects</h3>
+    <a class="btn btn-success" href="{{ url_for('admin.add_subject') }}">Add Subject</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if subjects %}
+            <table class="table table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Subject Name</th>
+                        <th>Subject Code</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subject in subjects %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ subject.subject_name }}</td>
+                            <td>{{ subject.subject_code }}</td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.edit_subject', subject_id=subject.subject_id) }}">Edit</a>
+                                <form class="d-inline" method="post" action="{{ url_for('admin.delete_subject', subject_id=subject.subject_id) }}" data-confirm="Delete this subject?">
+                                    <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="mb-0 text-muted">No subjects added yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

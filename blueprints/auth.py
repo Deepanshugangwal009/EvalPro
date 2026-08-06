@@ -75,7 +75,7 @@ def admin_login():
         if admin and check_password_hash(admin["password"], password):
             start_session("admin", admin["admin_id"], admin["username"])
             flash("Logged in as admin.", "success")
-            return redirect(url_for("home"))
+            return redirect(url_for("admin.dashboard"))
 
         flash("Invalid username or password.", "danger")
 
