@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">Welcome, {{ session.get('user_name') }}</h3>
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Available Exams</h6>
+                <h2 class="mb-0">{{ available_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Exams Attempted</h6>
+                <h2 class="mb-0">{{ attempted_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Average Percentage</h6>
+                <h2 class="mb-0">{{ '%.2f'|format(average_percentage) }}%</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a class="btn btn-primary" href="{{ url_for('student.exams') }}">View Exams</a>
+{% endblock %}

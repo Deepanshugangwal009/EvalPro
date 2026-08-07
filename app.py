@@ -2,6 +2,7 @@ from flask import Flask, render_template
 
 from blueprints.admin import admin_bp
 from blueprints.auth import auth_bp
+from blueprints.student import student_bp
 from config import Config
 
 
@@ -10,6 +11,7 @@ def create_app():
     app.config.from_object(Config)
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(student_bp)
     return app
 
 

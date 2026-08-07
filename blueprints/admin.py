@@ -14,6 +14,12 @@ def subject_code_exists(subject_code, subject_id=0):
     return subject is not None
 
 
+def get_subject_list():
+    return db.fetch_all(
+        "SELECT subject_id, subject_name, subject_code FROM subjects ORDER BY subject_name"
+    )
+
+
 def get_exam(exam_id):
     return db.fetch_one(
         "SELECT e.exam_id, e.exam_name, e.total_marks, s.subject_name "
@@ -30,6 +36,44 @@ def update_exam_total_marks(exam_id):
         "WHERE exam_id = %s",
         (exam_id, exam_id),
     )
+
+
+def read_exam_form():
+    subject_id = request.form.get("subject_id", "").strip()
+    duration = request.form.get("duration", "").strip()
+    return {
+        "exam_name": request.form.get("exam_name", "").strip(),
+        "subject_id": int(subject_id) if subject_id.isdigit() else 0,
+        "duration": int(duration) if duration.isdigit() else 0,
+        "exam_date": request.form.get("exam_date", ""),
+        "start_time": request.form.get("start_time", ""),
+        "end_time": request.form.get("end_time", ""),
+        "is_active": 1 if request.form.get("is_active") else 0,
+    }
+
+
+def is_exam_valid(exam):
+    filled = all(
+        exam[field] for field in ["exam_name", "exam_date", "start_time", "end_time"]
+    )
+    return (
+        filled
+        and exam["subject_id"] > 0
+        and exam["duration"] > 0
+        and exam["start_time"] < exam["end_time"]
+    )
+
+
+def blank_exam():
+    return {
+        "exam_name": "",
+        "subject_id": 0,
+        "duration": 60,
+        "exam_date": "",
+        "start_time": "",
+        "end_time": "",
+        "is_active": 1,
+    }
 
 
 def read_question_form():
@@ -74,10 +118,7 @@ def dashboard():
 @admin_bp.route("/subjects")
 @admin_required
 def subjects():
-    subject_list = db.fetch_all(
-        "SELECT subject_id, subject_name, subject_code FROM subjects ORDER BY subject_name"
-    )
-    return render_template("admin/subjects.html", subjects=subject_list)
+    return render_template("admin/subjects.html", subjects=get_subject_list())
 
 
 @admin_bp.route("/subjects/add", methods=["GET", "POST"])
@@ -147,20 +188,113 @@ def delete_subject(subject_id):
     return redirect(url_for("admin.subjects"))
 
 
+@admin_bp.route("/exams")
+@admin_required
+def exams():
+    exam_list = db.fetch_all(
+        "SELECT e.exam_id, e.exam_name, s.subject_name, e.duration, e.total_marks, e.exam_date, "
+        "CAST(e.start_time AS CHAR) AS start_time, CAST(e.end_time AS CHAR) AS end_time, "
+        "e.is_active, "
+        "(SELECT COUNT(*) FROM questions q WHERE q.exam_id = e.exam_id) AS question_count "
+        "FROM exams e JOIN subjects s ON e.subject_id = s.subject_id "
+        "ORDER BY e.exam_date DESC, e.start_time"
+    )
+    return render_template("admin/exams.html", exams=exam_list)
+
+
+@admin_bp.route("/exams/add", methods=["GET", "POST"])
+@admin_required
+def add_exam():
+    exam = blank_exam()
+
+    if request.method == "POST":
+        exam = read_exam_form()
+        if not is_exam_valid(exam):
+            flash("Please fill the exam details correctly and keep end time after start time.", "danger")
+        else:
+            db.execute(
+                "INSERT INTO exams (exam_name, subject_id, duration, exam_date, start_time, "
+                "end_time, is_active) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                (
+                    exam["exam_name"],
+                    exam["subject_id"],
+                    exam["duration"],
+                    exam["exam_date"],
+                    exam["start_time"],
+                    exam["end_time"],
+                    exam["is_active"],
+                ),
+            )
+            flash("Exam created successfully.", "success")
+            return redirect(url_for("admin.exams"))
+
+    return render_template(
+        "admin/exam_form.html", exam=exam, subjects=get_subject_list(), form_title="Create Exam"
+    )
+
+
+@admin_bp.route("/exams/edit/<int:exam_id>", methods=["GET", "POST"])
+@admin_required
+def edit_exam(exam_id):
+    exam = db.fetch_one(
+        "SELECT exam_id, exam_name, subject_id, duration, exam_date, "
+        "CAST(start_time AS CHAR) AS start_time, CAST(end_time AS CHAR) AS end_time, is_active "
+        "FROM exams WHERE exam_id = %s",
+        (exam_id,),
+    )
+    if not exam:
+        flash("Exam not found.", "danger")
+        return redirect(url_for("admin.exams"))
+
+    if request.method == "POST":
+        exam = read_exam_form()
+        if not is_exam_valid(exam):
+            flash("Please fill the exam details correctly and keep end time after start time.", "danger")
+        else:
+            db.execute(
+                "UPDATE exams SET exam_name = %s, subject_id = %s, duration = %s, exam_date = %s, "
+                "start_time = %s, end_time = %s, is_active = %s WHERE exam_id = %s",
+                (
+                    exam["exam_name"],
+                    exam["subject_id"],
+                    exam["duration"],
+                    exam["exam_date"],
+                    exam["start_time"],
+                    exam["end_time"],
+                    exam["is_active"],
+                    exam_id,
+                ),
+            )
+            flash("Exam updated successfully.", "success")
+            return redirect(url_for("admin.exams"))
+
+    return render_template(
+        "admin/exam_form.html", exam=exam, subjects=get_subject_list(), form_title="Edit Exam"
+    )
+
+
+@admin_bp.route("/exams/delete/<int:exam_id>", methods=["POST"])
+@admin_required
+def delete_exam(exam_id):
+    db.execute("DELETE FROM exams WHERE exam_id = %s", (exam_id,))
+    flash("Exam deleted successfully.", "success")
+    return redirect(url_for("admin.exams"))
+
+
 @admin_bp.route("/exams/<int:exam_id>/questions")
 @admin_required
 def exam_questions(exam_id):
     exam = get_exam(exam_id)
     if not exam:
         flash("Exam not found.", "danger")
-        return redirect(url_for("admin.dashboard"))
+        return redirect(url_for("admin.exams"))
 
     questions = db.fetch_all(
         "SELECT question_id, question_text, option_a, option_b, option_c, option_d, "
         "correct_answer, marks FROM questions WHERE exam_id = %s ORDER BY question_id",
         (exam_id,),
     )
-    return render_template("admin/questions.html", exam=exam, questions=questions)
+    return render_template("admin/exam_questions.html", exam=exam, questions=questions)
 
 
 @admin_bp.route("/exams/<int:exam_id>/questions/add", methods=["GET", "POST"])
@@ -169,7 +303,7 @@ def add_question(exam_id):
     exam = get_exam(exam_id)
     if not exam:
         flash("Exam not found.", "danger")
-        return redirect(url_for("admin.dashboard"))
+        return redirect(url_for("admin.exams"))
 
     question = blank_question()
 
@@ -211,7 +345,7 @@ def edit_question(question_id):
     )
     if not question:
         flash("Question not found.", "danger")
-        return redirect(url_for("admin.dashboard"))
+        return redirect(url_for("admin.exams"))
 
     exam = get_exam(question["exam_id"])
 
@@ -252,7 +386,7 @@ def delete_question(question_id):
     )
     if not question:
         flash("Question not found.", "danger")
-        return redirect(url_for("admin.dashboard"))
+        return redirect(url_for("admin.exams"))
 
     db.execute("DELETE FROM questions WHERE question_id = %s", (question_id,))
     update_exam_total_marks(question["exam_id"])

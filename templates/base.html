@@ -24,6 +24,16 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('admin.subjects') }}">Subjects</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin.exams') }}">Exams</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('student.dashboard') }}">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('student.exams') }}">Exams</a>
+                            </li>
                         {% endif %}
                         <li class="nav-item">
                             <span class="navbar-text me-3">{{ session.get('user_name') }} ({{ session.get('role') }})</span>

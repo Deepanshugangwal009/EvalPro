@@ -56,7 +56,7 @@ def student_login():
         if student and check_password_hash(student["password"], password):
             start_session("student", student["student_id"], student["name"])
             flash("Logged in successfully.", "success")
-            return redirect(url_for("home"))
+            return redirect(url_for("student.dashboard"))
 
         flash("Invalid email or password.", "danger")
 

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Questions | {{ exam.exam_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="mb-1">{{ exam.exam_name }}</h3>
+        <p class="text-muted mb-0">{{ exam.subject_name }} &middot; Total Marks: {{ exam.total_marks }}</p>
+    </div>
+    <div>
+        <a class="btn btn-outline-secondary" href="{{ url_for('admin.exams') }}">Back to Exams</a>
+        <a class="btn btn-success" href="{{ url_for('admin.add_question', exam_id=exam.exam_id) }}">Add Question</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% include 'admin/questions.html' %}
+    </div>
+</div>
+{% endblock %}
