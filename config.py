@@ -10,3 +10,5 @@ class Config:
     MYSQL_USER = "root"
     MYSQL_PASSWORD = ""
     MYSQL_DATABASE = "oes_db"
+
+    PASS_PERCENTAGE = 40

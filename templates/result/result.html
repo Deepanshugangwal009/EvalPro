@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Result | {{ result.exam_name }}{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+    <div class="card-body text-center">
+        <h4 class="card-title">{{ result.exam_name }}</h4>
+        <p class="text-muted">{{ result.subject_name }} &middot; {{ result.exam_date }}</p>
+
+        {% if result.result_status == 'Pass' %}
+            <span class="badge bg-success mb-3">Pass</span>
+        {% else %}
+            <span class="badge bg-danger mb-3">Fail</span>
+        {% endif %}
+
+        <h1 class="mb-3">{{ result.obtained_marks }} / {{ result.total_marks }}</h1>
+
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <th>Obtained Marks</th>
+                    <td>{{ result.obtained_marks }}</td>
+                </tr>
+                <tr>
+                    <th>Total Marks</th>
+                    <td>{{ result.total_marks }}</td>
+                </tr>
+                <tr>
+                    <th>Percentage</th>
+                    <td>{{ '%.2f'|format(result.percentage) }}%</td>
+                </tr>
+                <tr>
+                    <th>Status</th>
+                    <td>{{ result.result_status }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <a class="btn btn-primary" href="{{ url_for('student.dashboard') }}">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

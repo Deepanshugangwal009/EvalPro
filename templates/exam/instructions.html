@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Instructions | {{ exam.exam_name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">{{ exam.exam_name }}</h4>
+        <p class="text-muted">{{ exam.subject_name }}</p>
+
+        <table class="table table-bordered w-auto">
+            <tbody>
+                <tr>
+                    <th>Exam Date</th>
+                    <td>{{ exam.exam_date }}</td>
+                </tr>
+                <tr>
+                    <th>Exam Window</th>
+                    <td>{{ exam.start_time[:5] }} - {{ exam.end_time[:5] }}</td>
+                </tr>
+                <tr>
+                    <th>Duration</th>
+                    <td>{{ exam.duration }} minutes</td>
+                </tr>
+                <tr>
+                    <th>Total Questions</th>
+                    <td>{{ question_count }}</td>
+                </tr>
+                <tr>
+                    <th>Total Marks</th>
+                    <td>{{ exam.total_marks }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h6 class="mt-4">Instructions</h6>
+        <ul>
+            <li>The exam starts as soon as you click Start Exam and the timer cannot be paused.</li>
+            <li>Every question carries the marks shown beside it and there is no negative marking.</li>
+            <li>Use the question palette to move between questions and change your answers.</li>
+            <li>The exam is submitted automatically when the timer reaches zero.</li>
+            <li>You can attempt this exam only once.</li>
+        </ul>
+
+        <a class="btn btn-primary" href="{{ url_for('exam.attempt', exam_id=exam.exam_id) }}">Start Exam</a>
+        <a class="btn btn-outline-secondary" href="{{ url_for('student.exams') }}">Back to Exams</a>
+    </div>
+</div>
+{% endblock %}
