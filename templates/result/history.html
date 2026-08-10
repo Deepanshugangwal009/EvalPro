@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Result History{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">Result History</h3>
+
+<div class="card">
+    <div class="card-body">
+        {% if results %}
+            <table class="table table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Exam</th>
+                        <th>Subject</th>
+                        <th>Date</th>
+                        <th>Marks</th>
+                        <th>Percentage</th>
+                        <th>Status</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ result.exam_name }}</td>
+                            <td>{{ result.subject_name }}</td>
+                            <td>{{ result.exam_date }}</td>
+                            <td>{{ result.obtained_marks }} / {{ result.total_marks }}</td>
+                            <td>{{ '%.2f'|format(result.percentage) }}%</td>
+                            <td>
+                                {% if result.result_status == 'Pass' %}
+                                    <span class="badge bg-success">Pass</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Fail</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-primary" href="{{ url_for('result.view_result', exam_id=result.exam_id) }}">View</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="mb-0 text-muted">You have not attempted any exam yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

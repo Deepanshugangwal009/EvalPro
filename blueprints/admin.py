@@ -112,7 +112,40 @@ def blank_question():
 @admin_bp.route("/dashboard")
 @admin_required
 def dashboard():
-    return render_template("admin/dashboard.html")
+    summary = db.fetch_one(
+        "SELECT (SELECT COUNT(*) FROM students) AS total_students, "
+        "(SELECT COUNT(*) FROM subjects) AS total_subjects, "
+        "(SELECT COUNT(*) FROM exams) AS total_exams, "
+        "(SELECT COUNT(*) FROM attempts) AS total_attempts"
+    )
+    return render_template("admin/dashboard.html", summary=summary)
+
+
+@admin_bp.route("/reports")
+@admin_required
+def reports():
+    exam_statistics = db.fetch_all(
+        "SELECT exam_name, subject_name, exam_date, total_marks, total_attempts, "
+        "average_percentage, highest_percentage, lowest_percentage "
+        "FROM exam_statistics_view ORDER BY exam_date DESC, exam_name"
+    )
+    top_performers = db.fetch_all(
+        "SELECT student_name, COUNT(*) AS exams_attempted, "
+        "ROUND(AVG(percentage), 2) AS average_percentage, MAX(percentage) AS best_percentage "
+        "FROM student_performance_view GROUP BY student_id, student_name "
+        "ORDER BY average_percentage DESC LIMIT 5"
+    )
+    result_summary = db.fetch_one(
+        "SELECT COUNT(*) AS total_results, IFNULL(SUM(result_status = 'Pass'), 0) AS pass_count, "
+        "IFNULL(SUM(result_status = 'Fail'), 0) AS fail_count FROM results"
+    )
+    return render_template(
+        "admin/reports.html",
+        exam_statistics=exam_statistics,
+        subject_report=db.call_procedure("sp_subject_report"),
+        top_performers=top_performers,
+        result_summary=result_summary,
+    )
 
 
 @admin_bp.route("/subjects")

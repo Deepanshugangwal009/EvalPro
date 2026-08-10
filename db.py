@@ -29,6 +29,20 @@ def run_query(query, params=None, fetch=None):
         connection.close()
 
 
+def call_procedure(procedure_name, params=None):
+    connection = get_connection()
+    cursor = connection.cursor(dictionary=True)
+    try:
+        cursor.callproc(procedure_name, params or ())
+        rows = []
+        for stored_result in cursor.stored_results():
+            rows = stored_result.fetchall()
+        return rows
+    finally:
+        cursor.close()
+        connection.close()
+
+
 def fetch_one(query, params=None):
     return run_query(query, params, fetch="one")
 

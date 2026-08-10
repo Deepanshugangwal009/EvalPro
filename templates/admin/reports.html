@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">Reports & Analytics</h3>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Exam Statistics</h5>
+        {% if exam_statistics %}
+            <table class="table table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Exam</th>
+                        <th>Subject</th>
+                        <th>Date</th>
+                        <th>Total Marks</th>
+                        <th>Attempts</th>
+                        <th>Average %</th>
+                        <th>Highest %</th>
+                        <th>Lowest %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in exam_statistics %}
+                        <tr>
+                            <td>{{ row.exam_name }}</td>
+                            <td>{{ row.subject_name }}</td>
+                            <td>{{ row.exam_date }}</td>
+                            <td>{{ row.total_marks }}</td>
+                            <td>{{ row.total_attempts }}</td>
+                            <td>{{ '%.2f'|format(row.average_percentage) }}</td>
+                            <td>{{ '%.2f'|format(row.highest_percentage) }}</td>
+                            <td>{{ '%.2f'|format(row.lowest_percentage) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="mb-0 text-muted">No exams available for statistics.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Subject Wise Analysis</h5>
+        {% if subject_report %}
+            <table class="table table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Code</th>
+                        <th>Exams</th>
+                        <th>Attempts</th>
+                        <th>Average %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in subject_report %}
+                        <tr>
+                            <td>{{ row.subject_name }}</td>
+                            <td>{{ row.subject_code }}</td>
+                            <td>{{ row.total_exams }}</td>
+                            <td>{{ row.total_attempts }}</td>
+                            <td>{{ '%.2f'|format(row.average_percentage) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="mb-0 text-muted">No subjects available for analysis.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Student Performance Report</h5>
+        <div class="row mb-3">
+            <div class="col-md-4 mb-2">
+                <div class="border rounded p-3 text-center">
+                    <h6 class="text-muted">Total Results</h6>
+                    <h4 class="mb-0">{{ result_summary.total_results }}</h4>
+                </div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <div class="border rounded p-3 text-center">
+                    <h6 class="text-muted">Passed</h6>
+                    <h4 class="mb-0 text-success">{{ result_summary.pass_count }}</h4>
+                </div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <div class="border rounded p-3 text-center">
+                    <h6 class="text-muted">Failed</h6>
+                    <h4 class="mb-0 text-danger">{{ result_summary.fail_count }}</h4>
+                </div>
+            </div>
+        </div>
+
+        <h6>Top Performers</h6>
+        {% if top_performers %}
+            <table class="table table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student</th>
+                        <th>Exams Attempted</th>
+                        <th>Average %</th>
+                        <th>Best %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in top_performers %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ row.student_name }}</td>
+                            <td>{{ row.exams_attempted }}</td>
+                            <td>{{ '%.2f'|format(row.average_percentage) }}</td>
+                            <td>{{ '%.2f'|format(row.best_percentage) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="mb-0 text-muted">No results generated yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

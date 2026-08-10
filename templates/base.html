@@ -27,12 +27,21 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('admin.exams') }}">Exams</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin.reports') }}">Reports</a>
+                            </li>
                         {% else %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('student.dashboard') }}">Dashboard</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('student.exams') }}">Exams</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('student.performance') }}">Performance</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('result.history') }}">Results</a>
                             </li>
                         {% endif %}
                         <li class="nav-item">

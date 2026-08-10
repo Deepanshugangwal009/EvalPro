@@ -5,9 +5,44 @@
 {% block content %}
 <h3 class="mb-4">Admin Dashboard</h3>
 
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Students</h6>
+                <h2 class="mb-0">{{ summary.total_students }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Subjects</h6>
+                <h2 class="mb-0">{{ summary.total_subjects }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Exams</h6>
+                <h2 class="mb-0">{{ summary.total_exams }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Attempts</h6>
+                <h2 class="mb-0">{{ summary.total_attempts }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
-    <div class="col-md-4">
-        <div class="card">
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">Subjects</h5>
                 <p class="card-text">Add, edit and remove the subjects used while creating exams.</p>
@@ -15,12 +50,21 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card">
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">Exams</h5>
                 <p class="card-text">Create exams, schedule them and manage the questions of each exam.</p>
                 <a class="btn btn-primary" href="{{ url_for('admin.exams') }}">Manage Exams</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Reports</h5>
+                <p class="card-text">Check exam statistics, subject wise analysis and student performance.</p>
+                <a class="btn btn-primary" href="{{ url_for('admin.reports') }}">View Reports</a>
             </div>
         </div>
     </div>

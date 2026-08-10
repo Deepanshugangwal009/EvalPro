@@ -1,6 +1,7 @@
 USE oes_db;
 
 DROP PROCEDURE IF EXISTS sp_generate_result;
+DROP PROCEDURE IF EXISTS sp_subject_report;
 
 DELIMITER $$
 
@@ -47,6 +48,21 @@ BEGIN
         obtained_marks = v_obtained_marks,
         percentage = v_percentage,
         result_status = v_result_status;
+END$$
+
+CREATE PROCEDURE sp_subject_report()
+BEGIN
+    SELECT s.subject_id,
+           s.subject_name,
+           s.subject_code,
+           COUNT(DISTINCT e.exam_id) AS total_exams,
+           COUNT(r.result_id) AS total_attempts,
+           IFNULL(ROUND(AVG(r.percentage), 2), 0) AS average_percentage
+    FROM subjects s
+    LEFT JOIN exams e ON e.subject_id = s.subject_id
+    LEFT JOIN results r ON r.exam_id = e.exam_id
+    GROUP BY s.subject_id, s.subject_name, s.subject_code
+    ORDER BY s.subject_name;
 END$$
 
 DELIMITER ;

@@ -39,6 +39,15 @@ def get_student_exams(student_id, exam_id=None):
     return exams
 
 
+def get_student_performance(student_id):
+    return db.fetch_all(
+        "SELECT exam_id, exam_name, subject_name, exam_date, total_marks, obtained_marks, "
+        "percentage, result_status FROM student_performance_view "
+        "WHERE student_id = %s ORDER BY exam_date DESC, exam_name",
+        (student_id,),
+    )
+
+
 def get_student_exam(student_id, exam_id):
     exams = get_student_exams(student_id, exam_id)
     return exams[0] if exams else None
@@ -71,3 +80,21 @@ def dashboard():
 @login_required
 def exams():
     return render_template("student/exam_list.html", exams=get_student_exams(session["user_id"]))
+
+
+@student_bp.route("/performance")
+@login_required
+def performance():
+    student_id = session["user_id"]
+    summary = db.fetch_one(
+        "SELECT COUNT(*) AS total_exams, IFNULL(MAX(percentage), 0) AS best_percentage, "
+        "IFNULL(AVG(percentage), 0) AS average_percentage, "
+        "IFNULL(SUM(result_status = 'Pass'), 0) AS pass_count "
+        "FROM student_performance_view WHERE student_id = %s",
+        (student_id,),
+    )
+    return render_template(
+        "student/performance.html",
+        performance=get_student_performance(student_id),
+        summary=summary,
+    )

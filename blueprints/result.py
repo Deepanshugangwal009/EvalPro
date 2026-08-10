@@ -1,9 +1,18 @@
 from flask import Blueprint, flash, redirect, render_template, session, url_for
 
 import db
+from blueprints.student import get_student_performance
 from helpers.decorators import login_required
 
 result_bp = Blueprint("result", __name__, url_prefix="/result")
+
+
+@result_bp.route("/history")
+@login_required
+def history():
+    return render_template(
+        "result/history.html", results=get_student_performance(session["user_id"])
+    )
 
 
 @result_bp.route("/<int:exam_id>")
