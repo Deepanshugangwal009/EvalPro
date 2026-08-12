@@ -311,7 +311,7 @@ to appear.
 
 ---
 
-## Production Notes
+## Project Notes
 
 - Set `DEBUG = False` in `config.py` before deploying. The app reads this value in
   `app.run(debug=Config.DEBUG)`, and the custom 404 and 500 pages are only shown when
