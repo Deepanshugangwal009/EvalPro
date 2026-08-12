@@ -1,9 +1,26 @@
+import re
+
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import db
 
 auth_bp = Blueprint("auth", __name__)
+
+EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$")
+MINIMUM_PASSWORD_LENGTH = 6
+
+
+def get_registration_error(name, email, password, course, semester):
+    if not name or not email or not password or not course or not semester:
+        return "Please fill all the fields."
+    if not EMAIL_PATTERN.match(email):
+        return "Please enter a valid email address."
+    if len(password) < MINIMUM_PASSWORD_LENGTH:
+        return "Password must be at least {} characters long.".format(MINIMUM_PASSWORD_LENGTH)
+    if not semester.isdigit() or not 1 <= int(semester) <= 8:
+        return "Semester must be a number between 1 and 8."
+    return None
 
 
 def start_session(role, user_id, user_name):
@@ -23,8 +40,9 @@ def register():
         course = request.form.get("course", "").strip()
         semester = request.form.get("semester", "").strip()
 
-        if not name or not email or not password or not course or not semester.isdigit():
-            flash("Please fill all the fields correctly.", "danger")
+        registration_error = get_registration_error(name, email, password, course, semester)
+        if registration_error:
+            flash(registration_error, "danger")
             return render_template("auth/register.html")
 
         existing_student = db.fetch_one(

@@ -309,6 +309,11 @@ def edit_exam(exam_id):
 @admin_bp.route("/exams/delete/<int:exam_id>", methods=["POST"])
 @admin_required
 def delete_exam(exam_id):
+    linked_attempt = db.fetch_one("SELECT attempt_id FROM attempts WHERE exam_id = %s", (exam_id,))
+    if linked_attempt:
+        flash("Students have already attempted this exam, so it cannot be deleted.", "danger")
+        return redirect(url_for("admin.exams"))
+
     db.execute("DELETE FROM exams WHERE exam_id = %s", (exam_id,))
     flash("Exam deleted successfully.", "success")
     return redirect(url_for("admin.exams"))
@@ -420,6 +425,13 @@ def delete_question(question_id):
     if not question:
         flash("Question not found.", "danger")
         return redirect(url_for("admin.exams"))
+
+    linked_answer = db.fetch_one(
+        "SELECT answer_id FROM attempt_answers WHERE question_id = %s", (question_id,)
+    )
+    if linked_answer:
+        flash("This question is part of a submitted exam, so it cannot be deleted.", "danger")
+        return redirect(url_for("admin.exam_questions", exam_id=question["exam_id"]))
 
     db.execute("DELETE FROM questions WHERE question_id = %s", (question_id,))
     update_exam_total_marks(question["exam_id"])

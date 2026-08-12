@@ -2,6 +2,7 @@ from datetime import timedelta
 
 
 class Config:
+    DEBUG = True
     SECRET_KEY = "oes-development-secret-key"
     PERMANENT_SESSION_LIFETIME = timedelta(minutes=60)
 
