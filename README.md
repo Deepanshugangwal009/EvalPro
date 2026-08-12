@@ -1,6 +1,6 @@
-# Online Examination System (OES)
+# EvalPro - Online Examination System
 
-A web based Online Examination System built with Python, Flask and MySQL. An admin
+A web based online examination system built with Python, Flask and MySQL. An admin
 manages subjects, exams and the question bank, while students register, attempt
 scheduled timer based exams, and view their results and performance history.
 
@@ -106,6 +106,8 @@ oes/
 ├── config.py
 ├── db.py
 ├── requirements.txt
+├── Procfile
+├── runtime.txt
 ├── README.md
 ├── .gitignore
 │
@@ -175,9 +177,11 @@ oes/
 | File | Purpose |
 |------|---------|
 | `app.py` | Creates the Flask app, loads the config, registers all blueprints, defines the landing route and the 404/500 error handlers |
-| `config.py` | All configuration in one place: MySQL credentials, secret key, session lifetime, pass percentage, debug flag |
+| `config.py` | All configuration in one place, read from environment variables with local development defaults |
 | `db.py` | The only place that opens MySQL connections. Provides `get_connection`, `fetch_one`, `fetch_all`, `execute` and `call_procedure` |
 | `requirements.txt` | Python dependencies with the versions used |
+| `Procfile` | Start command used by the hosting platform (`gunicorn app:app`) |
+| `runtime.txt` | Python version the hosting platform should use |
 | `.gitignore` | Ignores `__pycache__/`, `*.pyc`, `.env` and `venv/` |
 
 **database/**
@@ -257,19 +261,28 @@ Default admin login:
 
 ## Configuration Steps
 
-Open `config.py` and set the values for your machine:
+`config.py` reads every setting from an environment variable and falls back to a local
+development default, so a normal local setup needs no changes at all.
 
-```python
-MYSQL_HOST = "localhost"
-MYSQL_PORT = 3306
-MYSQL_USER = "root"
-MYSQL_PASSWORD = "your_mysql_password"
-MYSQL_DATABASE = "oes_db"
+| Variable | Default | Meaning |
+|----------|---------|---------|
+| `MYSQL_HOST` | `localhost` | MySQL host |
+| `MYSQL_PORT` | `3306` | MySQL port |
+| `MYSQL_USER` | `root` | MySQL user |
+| `MYSQL_PASSWORD` | *(empty)* | Password for that user |
+| `MYSQL_DATABASE` | `oes_db` | Database name |
+| `SECRET_KEY` | development value | Signs the session cookie |
+| `FLASK_DEBUG` | `0` | Set to `1` for auto-reload while developing |
+| `PORT` | `5000` | Port the server listens on |
+
+If your local MySQL root account has a password, set it before starting the app:
+
+```
+set MYSQL_PASSWORD=your_mysql_password
 ```
 
-`PASS_PERCENTAGE` decides the Pass/Fail mark and is set to 40. `SECRET_KEY` is used
-to sign the session cookie, and `PERMANENT_SESSION_LIFETIME` keeps a login valid for
-60 minutes.
+`PASS_PERCENTAGE` decides the Pass/Fail mark and is set to 40 in `config.py`.
+`PERMANENT_SESSION_LIFETIME` keeps a login valid for 60 minutes.
 
 ---
 
@@ -280,6 +293,12 @@ python app.py
 ```
 
 Then open `http://127.0.0.1:5000/` in a browser.
+
+For auto-reload while developing, turn debug on first:
+
+```
+set FLASK_DEBUG=1
+```
 
 ---
 
@@ -305,21 +324,77 @@ Then open `http://127.0.0.1:5000/` in a browser.
 | Flask | 3.1.3 | Web framework and Jinja2 templating |
 | Werkzeug | 3.1.8 | Password hashing (`generate_password_hash`, `check_password_hash`) |
 | mysql-connector-python | 26.7.0 | MySQL driver, installs on Windows without a C compiler |
+| gunicorn | 26.0.0 | Production WSGI server used by the hosting platform |
 
 Bootstrap 5 is loaded from a CDN, so an internet connection is needed for the styling
 to appear.
 
 ---
 
-## Production Notes
+## Deployment
 
-- Set `DEBUG = False` in `config.py` before deploying. The app reads this value in
-  `app.run(debug=Config.DEBUG)`, and the custom 404 and 500 pages are only shown when
+### Netlify, GitHub Pages and Vercel static hosting will not work
+
+This is a **server rendered Flask application with a MySQL database**. It needs a
+running Python process and a live database connection on every request. Netlify and
+GitHub Pages only serve static files, so there is no `index.html` for them to publish
+and every URL returns "Page not found". The `templates/index.html` file in this repo is
+a Jinja2 template, not a static page: it only becomes HTML when Flask renders it.
+
+Deploying this project needs two things:
+
+1. A host that runs Python web services
+2. A hosted MySQL database
+
+### Recommended: PythonAnywhere (free, includes MySQL)
+
+PythonAnywhere is the simplest option because the free plan includes both the Python
+web app and a MySQL database.
+
+1. Create a free account and open a Bash console.
+2. Clone the repository and install the requirements:
+
+   ```
+   git clone https://github.com/Deepanshugangwal009/EvalPro.git
+   cd EvalPro
+   pip install --user -r requirements.txt
+   ```
+
+3. Open the **Databases** tab, set a MySQL password, and create a database. The full
+   name will look like `yourusername$oes_db`.
+4. Load the schema into it. The first two lines of `schema.sql` create and select a
+   local database, which a hosted account cannot do, so strip them:
+
+   ```
+   tail -n +3 database/schema.sql | mysql -u yourusername -h yourusername.mysql.pythonanywhere-services.com -p 'yourusername$oes_db'
+   mysql -u yourusername -h yourusername.mysql.pythonanywhere-services.com -p 'yourusername$oes_db' < database/seed.sql
+   ```
+
+   `seed.sql`, `views.sql` and `procedures.sql` also begin with `USE oes_db;`, so strip
+   that line the same way with `tail -n +2`.
+5. Open the **Web** tab, add a new manual-configuration Flask app, and point the WSGI
+   file at `app.py` so it imports `app`.
+6. In the Web tab's environment variables, set `MYSQL_HOST`, `MYSQL_USER`,
+   `MYSQL_PASSWORD`, `MYSQL_DATABASE` and a long random `SECRET_KEY`.
+7. Reload the web app.
+
+### Alternative: Render, Railway or Fly.io
+
+These run the app from the included `Procfile` (`gunicorn app:app`) and `runtime.txt`.
+They do not provide MySQL on the free plan, so pair them with a hosted MySQL such as
+Railway MySQL, Aiven or Clever Cloud, then set the same environment variables in the
+service dashboard.
+
+### Before going live
+
+- Leave `FLASK_DEBUG` unset or `0`. Debug mode exposes an interactive console that can
+  run arbitrary code on the server, and the custom 404 and 500 pages only appear when
   debug is off.
-- Replace `SECRET_KEY` with a long random value and do not keep it in version control.
-- Use a database user with only the permissions the app needs instead of `root`.
-- Run the app behind a real WSGI server (for example `waitress` on Windows or
-  `gunicorn` on Linux) instead of the Flask development server.
+- Set `SECRET_KEY` to a long random value through an environment variable, never in the
+  committed source.
+- Use a database user limited to this one database rather than `root`.
+- The app is served by `gunicorn` in production; the Flask development server started by
+  `python app.py` is for local use only.
 
 ---
 
