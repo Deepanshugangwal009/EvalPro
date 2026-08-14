@@ -45,7 +45,7 @@
                             </li>
                         {% endif %}
                         <li class="nav-item">
-                            <span class="navbar-text me-3">{{ session.get('user_name') }} ({{ session.get('role') }})</span>
+                            <span class="navbar-text d-inline-block me-2">{{ session.get('user_name') }} ({{ session.get('role') }})</span>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
